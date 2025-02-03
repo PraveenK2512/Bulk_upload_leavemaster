@@ -1,0 +1,89 @@
+
+--exec [Proc_Bulk_upload_Leave_Master] '','','',1
+
+
+alter PROCEDURE [dbo].[Proc_Bulk_upload_Leave_Master] 
+@XML          XML = '', 
+@user         VARCHAR(50) = '', 
+@Company_Id   INT = 0,
+@Flag int
+
+AS
+
+BEGIN
+BEGIN TRAN
+
+
+IF (@Flag=1)
+begin
+
+select ''COMPANY_CODE,''COMPANY_CODE,''Site_Name,''Leave_type,''Operation_Add_Delete
+
+End
+
+IF (@Flag=2)
+begin
+
+CREATE TABLE #UPLOADDATA
+(
+[RowNum] INT IDENTITY(1,1) 
+,COMPANY_CODE              NVARCHAR(250)
+,Site_Name NVARCHAR(500)
+,Leave_type NVARCHAR(250)
+,Operation NVARCHAR(250)
+
+)
+
+insert into #UPLOADDATA
+select 'PSL00002','','Sick Leave','add'
+insert into #UPLOADDATA
+select 'PSL00002','','Casual Leave',''
+insert into #UPLOADDATA
+select 'PSL00002','wdedsdf','Casual Leave','delete'
+
+
+DECLARE @XMLAttInput VARCHAR(MAX)
+SET @XMLAttInput=CONVERT(VARCHAR(MAX),@Xml)
+	DECLARE @DYNAMICXML VARCHAR(MAX)=		   				 			  			  			 		   					
+		  'DECLARE @XMLAttInput1 xml
+          SET @XMLAttInput1 = '''+@XMLAttInput+ '''
+		  
+		   INSERT #UPLOADDATA
+		    SELECT 
+			tab.col.value(''COMPANY_CODE[1]'',''varchar(max)'') COMPANY_CODE
+		   ,tab.col.value(''Site_Name[1]'',''varchar(max)'') Site_Name
+		   ,tab.col.value(''Leave_type[1]'',''varchar(max)'') Leave_type
+		   ,tab.col.value(''Operation_Add_Delete[1]'',''varchar(max)'') Operation
+		    
+	  FROM @XMLAttInput1.nodes(''//Employee'') tab(col)'
+	 -- PRINT @DYNAMICXML
+	  EXEC(@DYNAMICXML)
+
+select *  from #UPLOADDATA
+
+
+create table #error (
+MSG nvarchar(MAX)
+)
+
+
+
+select 'ROWNO: '+ CAST(RowNum AS VARCHAR(250)) + ' COMPANY_CODE ' + COMPANY_CODE + ' LEAVE_TYPE ' + LEAVE_TYPE 
++' Operation IS Mandatory'
+from #UPLOADDATA where isnull(Operation,'')=''
+
+select 'ROWNO: '+ CAST(RowNum AS VARCHAR(250)) + ' COMPANY_CODE ' + COMPANY_CODE + ' LEAVE_TYPE ' + LEAVE_TYPE 
++' Operation SHOULD BE ADD/DELETE'
+from #UPLOADDATA where isnull(Operation,'') NOT IN ('ADD','DELETE')
+
+
+
+select 'ROWNO: '+ CAST(RowNum AS VARCHAR(250)) + ' COMPANY_CODE ' + COMPANY_CODE + ' LEAVE_TYPE ' + LEAVE_TYPE 
++' Operation IS Mandatory'
+from #UPLOADDATA where isnull(Operation,'')=''
+
+
+END	 
+
+COMMIT 
+END
