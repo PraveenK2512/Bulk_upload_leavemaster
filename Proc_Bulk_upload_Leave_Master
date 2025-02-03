@@ -66,18 +66,16 @@ create table #error (
 MSG nvarchar(MAX)
 )
 
-
-
+insert into #error
 select 'ROWNO: '+ CAST(RowNum AS VARCHAR(250)) + ' COMPANY_CODE ' + COMPANY_CODE + ' LEAVE_TYPE ' + LEAVE_TYPE 
 +' Operation IS Mandatory'
 from #UPLOADDATA where isnull(Operation,'')=''
-
+insert into #error
 select 'ROWNO: '+ CAST(RowNum AS VARCHAR(250)) + ' COMPANY_CODE ' + COMPANY_CODE + ' LEAVE_TYPE ' + LEAVE_TYPE 
 +' Operation SHOULD BE ADD/DELETE'
 from #UPLOADDATA where isnull(Operation,'') NOT IN ('ADD','DELETE')
 
-
-
+insert into #error
 select 'ROWNO: '+ CAST(RowNum AS VARCHAR(250)) + ' COMPANY_CODE ' + COMPANY_CODE + ' LEAVE_TYPE ' + LEAVE_TYPE 
 +' Operation IS Mandatory'
 from #UPLOADDATA where isnull(Operation,'')=''
